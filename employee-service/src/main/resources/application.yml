@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: employee-service
+  config:
+    import: "optional:configserver:http://localhost:8088" #optional means, if config server is not available, still application will start
