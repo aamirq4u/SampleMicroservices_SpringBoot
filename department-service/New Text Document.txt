@@ -1,0 +1,18 @@
+#install zipkin as to see logs in detail
+1. install and open docker locally on system [screenshot_install_open_docker]
+2. open terminal and paste [screenshot_terminal]
+3. add zipkin dependency in pom.xml in project 
+
+	<!-- zipkin-->
+		<!-- Micrometer tracing bridge (Brave) -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+
+		<!-- Zipkin reporter -->
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
+		</dependency>
+		<!-- zipkin-->
