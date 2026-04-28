@@ -37,8 +37,12 @@ public class EmployeeController {
     }
 
     @GetMapping("/department/{departmentId}")
-    public List<Employee> findByDepartment(@PathVariable Long departmentId){
+    public List<Employee> findByDepartment(@PathVariable("departmentId") Long departmentId){
         LOGGER.info("Employee findByDepartment: department Id={}", departmentId);
         return employeeRepository.findByDepartment(departmentId);
+    }
+    @DeleteMapping
+    public void removeAllEmployee(){
+        employeeRepository.findAll().clear();
     }
 }

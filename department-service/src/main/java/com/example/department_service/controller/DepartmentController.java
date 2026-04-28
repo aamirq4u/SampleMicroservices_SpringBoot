@@ -21,6 +21,9 @@ public class DepartmentController {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private EmployeeClient employeeClient;
+
     @PostMapping
     public Department add(@RequestBody Department department){
         LOGGER.info("Department add: {}", department);
@@ -37,6 +40,21 @@ public class DepartmentController {
     public Department findById(@PathVariable Long id){
         LOGGER.info("Department findById: id={}", id);
         return departmentRepository.findById(id);
+    }
+
+    @GetMapping("/with-employees")
+    public List<Department> findAllWithEmployees(){
+        LOGGER.info("Department findAllWithEmployees");
+        List<Department> departmentList = departmentRepository.findAll();
+        LOGGER.info("Department all department list {}",departmentList);
+        departmentList.forEach(department ->
+                department.setEmployees(
+                        employeeClient.findByDepartment(department.getId())));
+        return departmentList;
+    }
+    @DeleteMapping
+    public void removeAllDepartment(){
+        departmentRepository.findAll().clear();
     }
 }
 
