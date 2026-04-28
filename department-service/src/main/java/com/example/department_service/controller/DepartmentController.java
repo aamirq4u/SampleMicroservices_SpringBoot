@@ -1,5 +1,6 @@
 package com.example.department_service.controller;
 
+import com.example.department_service.client.EmployeeClient;
 import com.example.department_service.model.Department;
 import com.example.department_service.repository.DepartmentRepository;
 import org.slf4j.Logger;
