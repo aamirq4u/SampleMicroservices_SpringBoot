@@ -2,7 +2,7 @@ name: Build & Push Microservices to Docker Hub
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main","dvlp_code" ]
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
         service: [config-server, service-registry, api-gateway, order-service, user-service]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v3
