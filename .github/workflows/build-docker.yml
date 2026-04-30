@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [config-server, service-registry, api-gateway, order-service, user-service]
+        service: [service-registry, department-service, config-server, employee-service, api-gateway]
 
     steps:
       - uses: actions/checkout@v4
