@@ -2,7 +2,7 @@ name: Build & Push Microservices to Docker Hub
 
 on:
   push:
-    branches: [ "main","dvlp_code" ]
+    branches: [ "release_render" ]
 
 jobs:
   build:
