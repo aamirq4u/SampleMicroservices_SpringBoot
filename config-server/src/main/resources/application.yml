@@ -2,13 +2,21 @@ spring:
   application:
     name: config-server
   profiles:
-    active: default # by default, it is git
+    active: native # by default, it is git
+#  cloud:
+#    config:
+#      server:
+#        git:
+#          uri: https://github.com/aamirq4u/SampleMicroservices_Config # configured repo with aamirq4u at "aamirq4u / SampleMicroservices_Config"
+#          default-label: release_render   # branch name
+#          clone-on-start: true
+
   cloud:
     config:
       server:
-        git:
-          uri: https://github.com/aamirq4u/SampleMicroservices_Config # configured repo with aamirq4u at "aamirq4u / SampleMicroservices_Config"
-          clone-on-start: true
+        native:
+          search-locations: file:///D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\config-server
+
 
 server:
   port: 8088
