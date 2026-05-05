@@ -1,8 +1,8 @@
 spring:
   application:
     name: config-server
-  profiles:
-    active: git # by default, it is git
+#  profiles:
+#    active: git # by default, it is git
   cloud:
     config:
       server:
