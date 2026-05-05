@@ -1,6 +1,6 @@
 spring:
   application:
-    name: department-service
+    name: DEPARTMENT-SERVICE
   config:
     import: "optional:configserver:${CONFIG_SERVER_URL}" #optional means, if config server is not available, still application will start
 server:

@@ -3,11 +3,11 @@ spring:
     gateway:
       routes:
         - id: employee-service
-          uri: lb://employee-service
+          uri: lb://EMPLOYEE-SERVICE
           predicates:
             - Path=/employee/**
         - id: department-service
-          uri: lb://department-service
+          uri: lb://DEPARTMENT-SERVICE
           predicates:
             - Path=/department/**
 server:
