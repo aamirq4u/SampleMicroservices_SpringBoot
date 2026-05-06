@@ -33,7 +33,7 @@ jobs:
       - name: Push Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
 
-  simple-deploy-step:
+  deploy-to-render:
     needs: build
     runs-on: ubuntu-latest
 
@@ -49,7 +49,7 @@ jobs:
           for i in {1..30}; do
             status=$(curl -s ${{ secrets.CONFIG_URL }} | grep -c "UP" || true)
             if [ "$status" -gt 0 ]; then
-              echo "Config Server UP"
+              echo "::notice:: Config Server UP"
               exit 0
             fi
             echo "Waiting Config Server..."
@@ -63,15 +63,15 @@ jobs:
       - name: Deploy Service registry (Eureka) Server
         run: curl -X POST ${{ secrets.SERVICE_HOOK }}
 
-      - name: Wait for Service registry
+      - name: Wait for Service registry (Eureka) Server
         run: |
           for i in {1..30}; do
             status=$(curl -s ${{ secrets.SERVICE_URL }} | grep -c "UP" || true)
             if [ "$status" -gt 0 ]; then
-              echo "Service registry UP"
+              echo "::notice:: Service registry (Eureka) Server UP"
               exit 0
             fi
-            echo "Waiting Service registry..."
+            echo "Waiting Service registry (Eureka) Server..."
             sleep 10
           done
           exit 1
@@ -82,15 +82,15 @@ jobs:
       - name: Deploy Department Service
         run: curl -X POST ${{ secrets.DEPARTMENT_HOOK }}
 
-      - name: Wait for Department
+      - name: Wait for Department Service
         run: |
           for i in {1..30}; do
             status=$(curl -s ${{ secrets.DEPARTMENT_URL }} | grep -c "UP" || true)
             if [ "$status" -gt 0 ]; then
-              echo "Department UP"
+              echo "::notice:: Department Service UP"
               exit 0
             fi
-            echo "Waiting Department..."
+            echo "Waiting Department Service..."
             sleep 10
           done
           exit 1
@@ -101,15 +101,15 @@ jobs:
       - name: Deploy Employee Service
         run: curl -X POST ${{ secrets.EMPLOYEE_HOOK }}
 
-      - name: Wait for Employee
+      - name: Wait for Employee Service
         run: |
           for i in {1..30}; do
             status=$(curl -s ${{ secrets.EMPLOYEE_URL }} | grep -c "UP" || true)
             if [ "$status" -gt 0 ]; then
-              echo "Employee UP"
+              echo "::notice:: Employee Service UP"
               exit 0
             fi
-            echo "Waiting Employee..."
+            echo "Waiting Employee Service..."
             sleep 10
           done
           exit 1
@@ -125,7 +125,7 @@ jobs:
           for i in {1..30}; do
             status=$(curl -s ${{ secrets.GATEWAY_URL }} | grep -c "UP" || true)
             if [ "$status" -gt 0 ]; then
-              echo "Gateway UP"
+              echo "::notice:: Gateway UP"
               exit 0
             fi
             echo "Waiting Gateway..."
@@ -146,4 +146,4 @@ jobs:
           curl -f ${{ secrets.EMPLOYEE_URL }} || exit 1
           curl -f ${{ secrets.GATEWAY_URL }} || exit 1
 
-          echo "ALL SERVICES ARE UP AND HEALTHY"
+          echo -e "::notice:: \n\nALL SERVICES ARE UP AND HEALTHY"
