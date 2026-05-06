@@ -32,3 +32,14 @@ jobs:
 
       - name: Push Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
+
+  simple-deploy-step:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run deployment confirmation step
+        run: echo "All microservices built and pushed successfully 🚀"
