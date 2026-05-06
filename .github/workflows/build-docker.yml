@@ -2,7 +2,7 @@ name: Build & Push Microservices to Docker Hub
 
 on:
   push:
-    branches: [ "release_render" ]
+    branches: [ "render_codeCleanUp" ]
 
 jobs:
   build:

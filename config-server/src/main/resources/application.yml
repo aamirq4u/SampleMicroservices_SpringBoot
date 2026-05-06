@@ -1,8 +1,7 @@
 spring:
   application:
     name: config-server
-#  profiles:
-#    active: git # by default, it is git
+
   cloud:
     config:
       server:
@@ -10,12 +9,6 @@ spring:
           uri: https://github.com/aamirq4u/SampleMicroservices_Config # configured repo with aamirq4u at "aamirq4u / SampleMicroservices_Config"
           default-label: release_render   # branch name
           clone-on-start: true
-
-#  cloud:
-#    config:
-#      server:
-#        native:
-#          search-locations: file:///D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\config-server
 
 
 server:
