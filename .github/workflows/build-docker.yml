@@ -32,14 +32,3 @@ jobs:
 
       - name: Push Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
-
-  trigger-deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Trigger deploy-simple workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: "Simple Workflow"
-          ref: render_codeCleanUp

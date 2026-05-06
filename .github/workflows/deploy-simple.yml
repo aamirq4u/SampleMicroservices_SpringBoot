@@ -5,6 +5,8 @@ on:
     workflows: ["Build & Push Microservices to Docker Hub"]  # must match name in workflow build-docker.yml
     types:
       - completed
+    branches:
+      - render_codeCleanUp
 
 jobs:
   simple-job:
