@@ -120,4 +120,4 @@ jobs:
           curl -f ${{ secrets.EMPLOYEE_URL }} || exit 1
           curl -f ${{ secrets.GATEWAY_URL }} || exit 1
           
-          echo "ALL SERVICES ARE HEALTHY"
+          echo "ALL SERVICES ARE UP AND HEALTHY"
