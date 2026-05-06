@@ -1,21 +1,18 @@
-name: Simple Workflow
+name: Second Action
 
 on:
   workflow_run:
-    workflows: ["Build & Push Microservices to Docker Hub"]  # must match name in workflow build-docker.yml
-    types:
-      - completed
-    branches:
-      - render_codeCleanUp
+    workflows: ["Build & Push Microservices to Docker Hub"]
+    types: [completed]
+    branches: [ "render_codeCleanUp" ]
 
 jobs:
-  simple-job:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  run-second-action:
+    if: github.event.workflow_run.conclusion == 'success'  # Only run if first workflow succeeded
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run a simple command
-        run: echo "Hello from GitHub Actions"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - name: Run second action
+        run: echo "Second action running after first workflow completes successfully"
