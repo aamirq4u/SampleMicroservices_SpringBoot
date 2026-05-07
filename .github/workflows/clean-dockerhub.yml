@@ -1,4 +1,4 @@
-name: Cleanup Docker Hub Tags
+name: Docker Hub Cleanup (All Repos)
 
 on:
   workflow_dispatch:
@@ -9,13 +9,57 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
 
+    env:
+      KEEP: 10
+
     steps:
-      - name: Delete old docker images on hub
-        uses: snok/container-retention-policy@v3.0.1
-        with:
-          account: ${{ secrets.DOCKER_USERNAME }}
-          token: ${{ secrets.DOCKER_DELETE_TOKEN }}
-          image-names: "*"
-          cut-off: 1d
-          keep-at-least: 1
-          tag-selection: untagged
+
+      - name: Fetch and cleanup Docker Hub repos
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_DELETE_TOKEN }}
+        run: |
+          set -e
+
+          echo "Fetching repositories..."
+
+          REPOS=$(curl -s \
+            "https://hub.docker.com/v2/repositories/$DOCKER_USER/?page_size=100" \
+            | jq -r '.results[].name')
+
+          for REPO in $REPOS; do
+            echo "=============================="
+            echo "Repo: $REPO"
+
+            TAGS=$(curl -s -H "Authorization: JWT $DOCKER_TOKEN" \
+              "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/?page_size=100" \
+              | jq -r '.results | sort_by(.last_updated) | reverse | .[].name')
+
+            COUNT=$(echo "$TAGS" | wc -l)
+            DELETE_COUNT=$((COUNT - KEEP))
+
+            if [ "$DELETE_COUNT" -le 0 ]; then
+              echo "Nothing to delete in $REPO"
+              continue
+            fi
+
+            echo "Deleting $DELETE_COUNT old tags in $REPO"
+
+            echo "$TAGS" | tail -n "$DELETE_COUNT" | while read TAG; do
+
+              # Safety skip for important tags
+              if [[ "$TAG" == "latest" || "$TAG" == "prod" ]]; then
+                echo "Skipping protected tag: $TAG"
+                continue
+              fi
+
+              echo "Deleting $REPO:$TAG"
+
+              curl -s -X DELETE \
+                -H "Authorization: JWT $DOCKER_TOKEN" \
+                "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/$TAG/"
+            done
+
+          done
+
+          echo "Cleanup completed."
