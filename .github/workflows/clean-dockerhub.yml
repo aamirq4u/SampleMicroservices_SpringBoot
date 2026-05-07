@@ -1,0 +1,21 @@
+name: Cleanup Docker Hub Tags
+
+on:
+  schedule:
+    - cron: '40 18 * * *'
+      timezone: 'Asia/Kolkata'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete old docker images on hub
+        uses: snok/container-retention-policy@v3
+        with:
+          account: ${{ secrets.DOCKER_USERNAME }}
+          token: ${{ secrets.DOCKER_TOKEN }}
+          image-names: "*"
+          cut-off: 1d
+          keep-at-least: 1
+          tag-selection: untagged
