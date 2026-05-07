@@ -45,7 +45,7 @@ jobs:
         run: |
           CONFIG_RESPONSE=$(curl -s -X POST "${{ secrets.CONFIG_HOOK }}")
           echo "$CONFIG_RESPONSE"
-          CONFIG_DEPLOY_ID=$(echo $CONFIG_RESPONSE | jq -r '.id')
+          CONFIG_DEPLOY_ID=$(echo $CONFIG_RESPONSE | jq -r '.deploy.id')
           echo "Config Deploy ID: $CONFIG_DEPLOY_ID"
           
           for i in {1..30}; do
@@ -78,7 +78,7 @@ jobs:
         run: |
           SERVICE_RESPONSE=$(curl -s -X POST "${{ secrets.SERVICE_HOOK }}")
           echo "$SERVICE_RESPONSE"
-          SERVICE_DEPLOY_ID=$(echo $SERVICE_RESPONSE | jq -r '.id')
+          SERVICE_DEPLOY_ID=$(echo $SERVICE_RESPONSE | jq -r '.deploy.id')
           echo "Service Deploy ID: $SERVICE_DEPLOY_ID"
           
           for i in {1..30}; do
@@ -110,7 +110,7 @@ jobs:
         run: |
           DEPARTMENT_RESPONSE=$(curl -s -X POST "${{ secrets.DEPARTMENT_HOOK }}")
           echo "$DEPARTMENT_RESPONSE"
-          DEPARTMENT_DEPLOY_ID=$(echo $DEPARTMENT_RESPONSE | jq -r '.id')
+          DEPARTMENT_DEPLOY_ID=$(echo $DEPARTMENT_RESPONSE | jq -r '.deploy.id')
           echo "Department Deploy ID: $DEPARTMENT_DEPLOY_ID"
           
           for i in {1..30}; do
@@ -143,7 +143,7 @@ jobs:
         run: |
           EMPLOYEE_RESPONSE=$(curl -s -X POST "${{ secrets.EMPLOYEE_HOOK }}")
           echo "$EMPLOYEE_RESPONSE"
-          EMPLOYEE_DEPLOY_ID=$(echo $EMPLOYEE_RESPONSE | jq -r '.id')
+          EMPLOYEE_DEPLOY_ID=$(echo $EMPLOYEE_RESPONSE | jq -r '.deploy.id')
           echo "Employee Deploy ID: $EMPLOYEE_DEPLOY_ID"
           
           for i in {1..30}; do
@@ -177,7 +177,7 @@ jobs:
         run: |
           GATEWAY_RESPONSE=$(curl -s -X POST "${{ secrets.GATEWAY_HOOK }}")
           echo "$GATEWAY_RESPONSE"
-          GATEWAY_DEPLOY_ID=$(echo $GATEWAY_RESPONSE | jq -r '.id')
+          GATEWAY_DEPLOY_ID=$(echo $GATEWAY_RESPONSE | jq -r '.deploy.id')
           echo "Gateway Deploy ID: $GATEWAY_DEPLOY_ID"
           
           for i in {1..30}; do
