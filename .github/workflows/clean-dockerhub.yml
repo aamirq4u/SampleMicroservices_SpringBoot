@@ -11,6 +11,11 @@ jobs:
 
     steps:
       - name: Delete old docker images on hub
-        run: |
-          echo "Deleting docker files"
-          echo -e "\n\n::notice:: Deleted"
+        uses: snok/container-retention-policy@v3
+        with:
+          account: ${{ secrets.DOCKER_USERNAME }}
+          token: ${{ secrets.DOCKER_TOKEN }}
+          image-names: "*"
+          cut-off: 1d
+          keep-at-least: 1
+          tag-selection: untagged
