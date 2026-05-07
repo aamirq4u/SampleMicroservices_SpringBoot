@@ -3,14 +3,14 @@ name: Docker Hub Cleanup (All Repos)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '55 14 * * *'
+    - cron: '30 12 * * *'
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
 
     env:
-      KEEP: 2
+      KEEP: 3
 
     steps:
       - name: Install jq
