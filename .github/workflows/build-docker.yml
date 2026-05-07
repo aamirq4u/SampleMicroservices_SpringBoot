@@ -146,4 +146,4 @@ jobs:
           curl -f ${{ secrets.EMPLOYEE_URL }} || exit 1
           curl -f ${{ secrets.GATEWAY_URL }} || exit 1
 
-          echo -e "::notice:: \n\nALL SERVICES ARE UP AND HEALTHY"
+          echo -e "\n\n::notice:: ALL SERVICES ARE UP AND HEALTHY"
