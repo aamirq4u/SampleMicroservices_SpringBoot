@@ -3,7 +3,7 @@ name: Cleanup Docker Hub Tags
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 13 * * *'
+    - cron: '55 14 * * *'
 
 jobs:
   cleanup:
