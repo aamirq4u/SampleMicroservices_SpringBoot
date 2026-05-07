@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "render_codeCleanUp" ]
 
+env:
+  PROJECT_NAME: springmicro
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,14 +36,14 @@ jobs:
       - name: Build Image
         run: |
           docker build \
-            -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest \
-            -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:${{ env.SHORT_SHA }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJECT_NAME }}/${{ matrix.service }}:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJECT_NAME }}/${{ matrix.service }}:${{ env.SHORT_SHA }} \
             ./${{ matrix.service }}
 
       - name: Push Image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:${{ env.SHORT_SHA }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJECT_NAME }}/${{ matrix.service }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJECT_NAME }}/${{ matrix.service }}:${{ env.SHORT_SHA }}
 
   deploy-to-render:
     needs: build
