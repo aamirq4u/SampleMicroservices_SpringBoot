@@ -42,18 +42,32 @@ jobs:
       # 1. Deploy Config Server
       # =============================
       - name: Deploy Config Server
-        run: curl -X POST ${{ secrets.CONFIG_HOOK }}
-
-      - name: Wait for Config Server
         run: |
+          CONFIG_RESPONSE=$(curl -s -X POST "${{ secrets.CONFIG_HOOK }}")
+          echo "CONFIG_RESPONSE"
+          CONFIG_DEPLOY_ID=$(echo CONFIG_RESPONSE | jq -r '.id')
+          echo "Config Deploy ID: CONFIG_DEPLOY_ID"
+          
           for i in {1..30}; do
-            status=$(curl -s ${{ secrets.CONFIG_URL }} | grep -c "UP" || true)
-            if [ "$status" -gt 0 ]; then
-              echo "::notice:: Config Server UP"
-              exit 0
+            CONFIG_STATUS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              "https://api.render.com/v1/services/${{ secrets.CONFIG_SERVICE_ID }}/deploys/${CONFIG_DEPLOY_ID}" \
+              | jq -r '.status')
+
+            echo "[config-service] Status: CONFIG_STATUS"
+
+            if [ "CONFIG_STATUS" = "live" ]; then
+              echo "Config service deployed"
+              break
             fi
+
+            if [ "CONFIG_STATUS" = "build_failed" ] || [ "CONFIG_STATUS" = "update_failed" ]; then
+              echo "Config service failed"
+              exit 1
+            fi
+
             echo "Waiting Config Server..."
-            sleep 10
+            sleep 20
           done
           exit 1
 
@@ -61,18 +75,31 @@ jobs:
       # 2. Deploy Service registry (Eureka)
       # =============================
       - name: Deploy Service registry (Eureka) Server
-        run: curl -X POST ${{ secrets.SERVICE_HOOK }}
-
-      - name: Wait for Service registry (Eureka) Server
         run: |
+          SERVICE_RESPONSE=$(curl -s -X POST "${{ secrets.SERVICE_HOOK }}")
+          echo "SERVICE_RESPONSE"
+          SERVICE_DEPLOY_ID=$(echo SERVICE_RESPONSE | jq -r '.id')
+          echo "Service Deploy ID: SERVICE_DEPLOY_ID"
+          
           for i in {1..30}; do
-            status=$(curl -s ${{ secrets.SERVICE_URL }} | grep -c "UP" || true)
-            if [ "$status" -gt 0 ]; then
-              echo "::notice:: Service registry (Eureka) Server UP"
-              exit 0
+            SERVICE_STATUS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              "https://api.render.com/v1/services/${{ secrets.SERVICE_SERVICE_ID }}/deploys/${SERVICE_DEPLOY_ID}" \
+              | jq -r '.status')
+          
+            echo "[service-service] Status: SERVICE_STATUS"
+          
+            if [ "SERVICE_STATUS" = "live" ]; then
+              echo "Service service deployed"
+              break
+            fi
+          
+            if [ "SERVICE_STATUS" = "build_failed" ] || [ "SERVICE_STATUS" = "update_failed" ]; then
+              echo "Service service failed"
+              exit 1
             fi
             echo "Waiting Service registry (Eureka) Server..."
-            sleep 10
+            sleep 20
           done
           exit 1
 
@@ -80,18 +107,31 @@ jobs:
       # 3. Deploy Department Service
       # =============================
       - name: Deploy Department Service
-        run: curl -X POST ${{ secrets.DEPARTMENT_HOOK }}
-
-      - name: Wait for Department Service
         run: |
+          DEPARTMENT_RESPONSE=$(curl -s -X POST "${{ secrets.DEPARTMENT_HOOK }}")
+          echo "DEPARTMENT_RESPONSE"
+          DEPARTMENT_DEPLOY_ID=$(echo DEPARTMENT_RESPONSE | jq -r '.id')
+          echo "Department Deploy ID: DEPARTMENT_DEPLOY_ID"
+          
           for i in {1..30}; do
-            status=$(curl -s ${{ secrets.DEPARTMENT_URL }} | grep -c "UP" || true)
-            if [ "$status" -gt 0 ]; then
-              echo "::notice:: Department Service UP"
-              exit 0
+            DEPARTMENT_STATUS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              "https://api.render.com/v1/services/${{ secrets.DEPARTMENT_SERVICE_ID }}/deploys/${DEPARTMENT_DEPLOY_ID}" \
+              | jq -r '.status')
+          
+            echo "[department-service] Status: DEPARTMENT_STATUS"
+          
+            if [ "DEPARTMENT_STATUS" = "live" ]; then
+              echo "Department service deployed"
+              break
+            fi
+          
+            if [ "DEPARTMENT_STATUS" = "build_failed" ] || [ "DEPARTMENT_STATUS" = "update_failed" ]; then
+              echo "Department service failed"
+              exit 1
             fi
             echo "Waiting Department Service..."
-            sleep 10
+            sleep 20
           done
           exit 1
 
@@ -99,39 +139,69 @@ jobs:
       # 4. Deploy Employee Service
       # =============================
       - name: Deploy Employee Service
-        run: curl -X POST ${{ secrets.EMPLOYEE_HOOK }}
 
-      - name: Wait for Employee Service
         run: |
+          EMPLOYEE_RESPONSE=$(curl -s -X POST "${{ secrets.EMPLOYEE_HOOK }}")
+          echo "EMPLOYEE_RESPONSE"
+          EMPLOYEE_DEPLOY_ID=$(echo EMPLOYEE_RESPONSE | jq -r '.id')
+          echo "Employee Deploy ID: EMPLOYEE_DEPLOY_ID"
+          
           for i in {1..30}; do
-            status=$(curl -s ${{ secrets.EMPLOYEE_URL }} | grep -c "UP" || true)
-            if [ "$status" -gt 0 ]; then
-              echo "::notice:: Employee Service UP"
-              exit 0
+            EMPLOYEE_STATUS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              "https://api.render.com/v1/services/${{ secrets.EMPLOYEE_SERVICE_ID }}/deploys/${EMPLOYEE_DEPLOY_ID}" \
+              | jq -r '.status')
+          
+            echo "[employee-service] Status: EMPLOYEE_STATUS"
+          
+            if [ "EMPLOYEE_STATUS" = "live" ]; then
+              echo "Employee service deployed"
+              break
+            fi
+          
+            if [ "EMPLOYEE_STATUS" = "build_failed" ] || [ "EMPLOYEE_STATUS" = "update_failed" ]; then
+              echo "Employee service failed"
+              exit 1
             fi
             echo "Waiting Employee Service..."
-            sleep 10
+            sleep 20
           done
           exit 1
+
 
       # =============================
       # 5. Deploy API Gateway
       # =============================
       - name: Deploy Gateway
-        run: curl -X POST ${{ secrets.GATEWAY_HOOK }}
 
-      - name: Wait for Gateway
         run: |
+          GATEWAY_RESPONSE=$(curl -s -X POST "${{ secrets.GATEWAY_HOOK }}")
+          echo "GATEWAY_RESPONSE"
+          GATEWAY_DEPLOY_ID=$(echo GATEWAY_RESPONSE | jq -r '.id')
+          echo "Gateway Deploy ID: GATEWAY_DEPLOY_ID"
+          
           for i in {1..30}; do
-            status=$(curl -s ${{ secrets.GATEWAY_URL }} | grep -c "UP" || true)
-            if [ "$status" -gt 0 ]; then
-              echo "::notice:: Gateway UP"
-              exit 0
+            GATEWAY_STATUS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              "https://api.render.com/v1/services/${{ secrets.GATEWAY_SERVICE_ID }}/deploys/${GATEWAY_DEPLOY_ID}" \
+              | jq -r '.status')
+          
+            echo "[gateway-service] Status: GATEWAY_STATUS"
+          
+            if [ "GATEWAY_STATUS" = "live" ]; then
+              echo "Gateway service deployed"
+              break
             fi
-            echo "Waiting Gateway..."
-            sleep 10
+          
+            if [ "GATEWAY_STATUS" = "build_failed" ] || [ "GATEWAY_STATUS" = "update_failed" ]; then
+              echo "Gateway service failed"
+              exit 1
+            fi
+            echo "Waiting Gateway Service..."
+            sleep 20
           done
           exit 1
+
 
       # =============================
       # 7. Final validation
