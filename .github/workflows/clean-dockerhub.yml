@@ -14,7 +14,7 @@ jobs:
         uses: snok/container-retention-policy@v3.0.1
         with:
           account: ${{ secrets.DOCKER_USERNAME }}
-          token: ${{ secrets.DOCKER_TOKEN }}
+          token: ${{ secrets.DOCKER_DELETE_TOKEN }}
           image-names: "*"
           cut-off: 1d
           keep-at-least: 1
