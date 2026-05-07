@@ -2,7 +2,7 @@ name: Cleanup Docker Hub Tags
 
 on:
   schedule:
-    - cron: '40 18 * * *'
+    - cron: '45 18 * * *'
       timezone: 'Asia/Kolkata'
 
 jobs:
