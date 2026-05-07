@@ -92,6 +92,12 @@ jobs:
 
               echo "Fetching manifest digest..."
 
+              DIGEST_RESPONSE=$(curl -fsSI \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                "${REGISTRY}/v2/${DOCKER_USER}/${REPO}/manifests/${TAG}")
+              echo "DIGEST_RESPONSE: $DIGEST_RESPONSE"
+          
               DIGEST=$(curl -fsSI \
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
