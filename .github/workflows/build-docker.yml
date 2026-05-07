@@ -44,9 +44,9 @@ jobs:
       - name: Deploy Config Server
         run: |
           CONFIG_RESPONSE=$(curl -s -X POST "${{ secrets.CONFIG_HOOK }}")
-          echo "CONFIG_RESPONSE"
-          CONFIG_DEPLOY_ID=$(echo CONFIG_RESPONSE | jq -r '.id')
-          echo "Config Deploy ID: CONFIG_DEPLOY_ID"
+          echo "$CONFIG_RESPONSE"
+          CONFIG_DEPLOY_ID=$(echo $CONFIG_RESPONSE | jq -r '.id')
+          echo "Config Deploy ID: $CONFIG_DEPLOY_ID"
           
           for i in {1..30}; do
             CONFIG_STATUS=$(curl -s \
@@ -54,14 +54,14 @@ jobs:
               "https://api.render.com/v1/services/${{ secrets.CONFIG_SERVICE_ID }}/deploys/${CONFIG_DEPLOY_ID}" \
               | jq -r '.status')
 
-            echo "[config-service] Status: CONFIG_STATUS"
+            echo "[config-service] Status: $CONFIG_STATUS"
 
-            if [ "CONFIG_STATUS" = "live" ]; then
+            if [ "$CONFIG_STATUS" = "live" ]; then
               echo "Config service deployed"
               break
             fi
 
-            if [ "CONFIG_STATUS" = "build_failed" ] || [ "CONFIG_STATUS" = "update_failed" ]; then
+            if [ "$CONFIG_STATUS" = "build_failed" ] || [ "$CONFIG_STATUS" = "update_failed" ]; then
               echo "Config service failed"
               exit 1
             fi
@@ -77,9 +77,9 @@ jobs:
       - name: Deploy Service registry (Eureka) Server
         run: |
           SERVICE_RESPONSE=$(curl -s -X POST "${{ secrets.SERVICE_HOOK }}")
-          echo "SERVICE_RESPONSE"
-          SERVICE_DEPLOY_ID=$(echo SERVICE_RESPONSE | jq -r '.id')
-          echo "Service Deploy ID: SERVICE_DEPLOY_ID"
+          echo "$SERVICE_RESPONSE"
+          SERVICE_DEPLOY_ID=$(echo $SERVICE_RESPONSE | jq -r '.id')
+          echo "Service Deploy ID: $SERVICE_DEPLOY_ID"
           
           for i in {1..30}; do
             SERVICE_STATUS=$(curl -s \
@@ -87,14 +87,14 @@ jobs:
               "https://api.render.com/v1/services/${{ secrets.SERVICE_SERVICE_ID }}/deploys/${SERVICE_DEPLOY_ID}" \
               | jq -r '.status')
           
-            echo "[service-service] Status: SERVICE_STATUS"
+            echo "[service-service] Status: $SERVICE_STATUS"
           
-            if [ "SERVICE_STATUS" = "live" ]; then
+            if [ "$SERVICE_STATUS" = "live" ]; then
               echo "Service service deployed"
               break
             fi
           
-            if [ "SERVICE_STATUS" = "build_failed" ] || [ "SERVICE_STATUS" = "update_failed" ]; then
+            if [ "$SERVICE_STATUS" = "build_failed" ] || [ "$SERVICE_STATUS" = "update_failed" ]; then
               echo "Service service failed"
               exit 1
             fi
@@ -109,9 +109,9 @@ jobs:
       - name: Deploy Department Service
         run: |
           DEPARTMENT_RESPONSE=$(curl -s -X POST "${{ secrets.DEPARTMENT_HOOK }}")
-          echo "DEPARTMENT_RESPONSE"
-          DEPARTMENT_DEPLOY_ID=$(echo DEPARTMENT_RESPONSE | jq -r '.id')
-          echo "Department Deploy ID: DEPARTMENT_DEPLOY_ID"
+          echo "$DEPARTMENT_RESPONSE"
+          DEPARTMENT_DEPLOY_ID=$(echo $DEPARTMENT_RESPONSE | jq -r '.id')
+          echo "Department Deploy ID: $DEPARTMENT_DEPLOY_ID"
           
           for i in {1..30}; do
             DEPARTMENT_STATUS=$(curl -s \
@@ -119,14 +119,14 @@ jobs:
               "https://api.render.com/v1/services/${{ secrets.DEPARTMENT_SERVICE_ID }}/deploys/${DEPARTMENT_DEPLOY_ID}" \
               | jq -r '.status')
           
-            echo "[department-service] Status: DEPARTMENT_STATUS"
+            echo "[department-service] Status: $DEPARTMENT_STATUS"
           
-            if [ "DEPARTMENT_STATUS" = "live" ]; then
+            if [ "$DEPARTMENT_STATUS" = "live" ]; then
               echo "Department service deployed"
               break
             fi
           
-            if [ "DEPARTMENT_STATUS" = "build_failed" ] || [ "DEPARTMENT_STATUS" = "update_failed" ]; then
+            if [ "$DEPARTMENT_STATUS" = "build_failed" ] || [ "$DEPARTMENT_STATUS" = "update_failed" ]; then
               echo "Department service failed"
               exit 1
             fi
@@ -142,9 +142,9 @@ jobs:
 
         run: |
           EMPLOYEE_RESPONSE=$(curl -s -X POST "${{ secrets.EMPLOYEE_HOOK }}")
-          echo "EMPLOYEE_RESPONSE"
-          EMPLOYEE_DEPLOY_ID=$(echo EMPLOYEE_RESPONSE | jq -r '.id')
-          echo "Employee Deploy ID: EMPLOYEE_DEPLOY_ID"
+          echo "$EMPLOYEE_RESPONSE"
+          EMPLOYEE_DEPLOY_ID=$(echo $EMPLOYEE_RESPONSE | jq -r '.id')
+          echo "Employee Deploy ID: $EMPLOYEE_DEPLOY_ID"
           
           for i in {1..30}; do
             EMPLOYEE_STATUS=$(curl -s \
@@ -152,14 +152,14 @@ jobs:
               "https://api.render.com/v1/services/${{ secrets.EMPLOYEE_SERVICE_ID }}/deploys/${EMPLOYEE_DEPLOY_ID}" \
               | jq -r '.status')
           
-            echo "[employee-service] Status: EMPLOYEE_STATUS"
+            echo "[employee-service] Status: $EMPLOYEE_STATUS"
           
-            if [ "EMPLOYEE_STATUS" = "live" ]; then
+            if [ "$EMPLOYEE_STATUS" = "live" ]; then
               echo "Employee service deployed"
               break
             fi
           
-            if [ "EMPLOYEE_STATUS" = "build_failed" ] || [ "EMPLOYEE_STATUS" = "update_failed" ]; then
+            if [ "$EMPLOYEE_STATUS" = "build_failed" ] || [ "$EMPLOYEE_STATUS" = "update_failed" ]; then
               echo "Employee service failed"
               exit 1
             fi
@@ -176,9 +176,9 @@ jobs:
 
         run: |
           GATEWAY_RESPONSE=$(curl -s -X POST "${{ secrets.GATEWAY_HOOK }}")
-          echo "GATEWAY_RESPONSE"
-          GATEWAY_DEPLOY_ID=$(echo GATEWAY_RESPONSE | jq -r '.id')
-          echo "Gateway Deploy ID: GATEWAY_DEPLOY_ID"
+          echo "$GATEWAY_RESPONSE"
+          GATEWAY_DEPLOY_ID=$(echo $GATEWAY_RESPONSE | jq -r '.id')
+          echo "Gateway Deploy ID: $GATEWAY_DEPLOY_ID"
           
           for i in {1..30}; do
             GATEWAY_STATUS=$(curl -s \
@@ -186,14 +186,14 @@ jobs:
               "https://api.render.com/v1/services/${{ secrets.GATEWAY_SERVICE_ID }}/deploys/${GATEWAY_DEPLOY_ID}" \
               | jq -r '.status')
           
-            echo "[gateway-service] Status: GATEWAY_STATUS"
+            echo "[gateway-service] Status: $GATEWAY_STATUS"
           
-            if [ "GATEWAY_STATUS" = "live" ]; then
+            if [ "$GATEWAY_STATUS" = "live" ]; then
               echo "Gateway service deployed"
               break
             fi
           
-            if [ "GATEWAY_STATUS" = "build_failed" ] || [ "GATEWAY_STATUS" = "update_failed" ]; then
+            if [ "$GATEWAY_STATUS" = "build_failed" ] || [ "$GATEWAY_STATUS" = "update_failed" ]; then
               echo "Gateway service failed"
               exit 1
             fi
