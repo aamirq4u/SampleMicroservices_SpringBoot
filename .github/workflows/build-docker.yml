@@ -58,15 +58,13 @@ jobs:
 
             if [ "$CONFIG_STATUS" = "live" ]; then
               echo "Config service deployed"
-              break
+              exit 0
             fi
 
             if [ "$CONFIG_STATUS" = "build_failed" ] || [ "$CONFIG_STATUS" = "update_failed" ]; then
               echo "Config service failed"
               exit 1
             fi
-
-            echo "Waiting Config Server..."
             sleep 20
           done
           exit 1
@@ -91,14 +89,13 @@ jobs:
           
             if [ "$SERVICE_STATUS" = "live" ]; then
               echo "Service service deployed"
-              break
+              exit 0
             fi
           
             if [ "$SERVICE_STATUS" = "build_failed" ] || [ "$SERVICE_STATUS" = "update_failed" ]; then
               echo "Service service failed"
               exit 1
             fi
-            echo "Waiting Service registry (Eureka) Server..."
             sleep 20
           done
           exit 1
@@ -123,14 +120,13 @@ jobs:
           
             if [ "$DEPARTMENT_STATUS" = "live" ]; then
               echo "Department service deployed"
-              break
+              exit 0
             fi
           
             if [ "$DEPARTMENT_STATUS" = "build_failed" ] || [ "$DEPARTMENT_STATUS" = "update_failed" ]; then
               echo "Department service failed"
               exit 1
             fi
-            echo "Waiting Department Service..."
             sleep 20
           done
           exit 1
@@ -156,14 +152,13 @@ jobs:
           
             if [ "$EMPLOYEE_STATUS" = "live" ]; then
               echo "Employee service deployed"
-              break
+              exit 0
             fi
           
             if [ "$EMPLOYEE_STATUS" = "build_failed" ] || [ "$EMPLOYEE_STATUS" = "update_failed" ]; then
               echo "Employee service failed"
               exit 1
             fi
-            echo "Waiting Employee Service..."
             sleep 20
           done
           exit 1
@@ -190,14 +185,13 @@ jobs:
           
             if [ "$GATEWAY_STATUS" = "live" ]; then
               echo "Gateway service deployed"
-              break
+              exit 0
             fi
           
             if [ "$GATEWAY_STATUS" = "build_failed" ] || [ "$GATEWAY_STATUS" = "update_failed" ]; then
               echo "Gateway service failed"
               exit 1
             fi
-            echo "Waiting Gateway Service..."
             sleep 20
           done
           exit 1
