@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      KEEP: 10
+      KEEP: 2
 
     steps:
 
