@@ -13,57 +13,124 @@ jobs:
       KEEP: 2
 
     steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Fetch and cleanup Docker Hub repos
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_TOKEN: ${{ secrets.DOCKER_DELETE_TOKEN }}
+          DOCKER_DELETE_TOKEN: ${{ secrets.DOCKER_DELETE_TOKEN }}
         run: |
-          set -e
+          set -euo pipefail
+
+          REGISTRY="https://registry-1.docker.io"
+          AUTH_URL="https://auth.docker.io/token"
 
           echo "Fetching repositories..."
 
-          REPOS=$(curl -s \
+          REPOS=$(curl -fsSL \
+            -H "Authorization: JWT $DOCKER_DELETE_TOKEN" \
             "https://hub.docker.com/v2/repositories/$DOCKER_USER/?page_size=100" \
             | jq -r '.results[].name')
 
+          if [ -z "$REPOS" ]; then
+            echo "No repositories found."
+            exit 0
+          fi
+
           for REPO in $REPOS; do
-            echo "=============================="
+            echo "========================================"
             echo "Repo: $REPO"
-            
-            RESPONSE=$(curl -s -H "Authorization: JWT $DOCKER_TOKEN" \
-              "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/?page_size=100")
-            echo "RESPONSE: $RESPONSE"
-          
-            TAGS=$(curl -s -H "Authorization: JWT $DOCKER_TOKEN" \
+
+            TAGS=$(curl -fsSL \
+              -H "Authorization: JWT $DOCKER_DELETE_TOKEN" \
               "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/?page_size=100" \
-              | jq -r '.results | sort_by(.last_updated) | reverse | .[].name')
+              | jq -r '
+                  .results
+                  | sort_by(.last_updated)
+                  | reverse
+                  | .[].name
+                ')
 
-            COUNT=$(echo "$TAGS" | wc -l)
-            DELETE_COUNT=$((COUNT - KEEP))
+            COUNT=$(echo "$TAGS" | sed '/^$/d' | wc -l)
 
-            if [ "$DELETE_COUNT" -le 0 ]; then
+            if [ "$COUNT" -le "$KEEP" ]; then
               echo "Nothing to delete in $REPO"
               continue
             fi
 
-            echo "Deleting $DELETE_COUNT old tags in $REPO"
+            DELETE_COUNT=$((COUNT - KEEP))
 
-            echo "$TAGS" | tail -n "$DELETE_COUNT" | while read TAG; do
+            echo "Keeping newest $KEEP tags"
+            echo "Deleting oldest $DELETE_COUNT tags"
 
-              # Safety skip for important tags
+            echo "$TAGS" | tail -n "$DELETE_COUNT" | while read -r TAG; do
+
+              if [ -z "$TAG" ]; then
+                continue
+              fi
+
+              # Protected tags
               if [[ "$TAG" == "latest" || "$TAG" == "prod" ]]; then
                 echo "Skipping protected tag: $TAG"
                 continue
               fi
 
-              echo "Deleting $REPO:$TAG"
+              echo "----------------------------------------"
+              echo "Processing: $REPO:$TAG"
 
-              curl -s -X DELETE \
-                -H "Authorization: JWT $DOCKER_TOKEN" \
-                "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/$TAG/"
+              echo "Fetching registry token..."
+
+              TOKEN=$(curl -fsSL \
+                "${AUTH_URL}?service=registry.docker.io&scope=repository:${DOCKER_USER}/${REPO}:pull,push,delete" \
+                | jq -r '.token')
+
+              if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+                echo "Failed to obtain registry token for $REPO"
+                continue
+              fi
+
+              echo "Fetching manifest digest..."
+
+              DIGEST=$(curl -fsSI \
+                -H "Authorization: Bearer $TOKEN" \
+                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                "${REGISTRY}/v2/${DOCKER_USER}/${REPO}/manifests/${TAG}" \
+                | awk '/Docker-Content-Digest/ {print $2}' \
+                | tr -d '\r')
+
+              if [ -z "$DIGEST" ]; then
+                echo "Could not determine digest for $REPO:$TAG"
+                continue
+              fi
+
+              echo "Digest: $DIGEST"
+
+              echo "Deleting manifest via registry API..."
+
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                -X DELETE \
+                -H "Authorization: Bearer $TOKEN" \
+                "${REGISTRY}/v2/${DOCKER_USER}/${REPO}/manifests/${DIGEST}")
+
+              if [ "$HTTP_CODE" == "202" ]; then
+                echo "Registry manifest deleted successfully."
+              else
+                echo "Registry delete failed with HTTP $HTTP_CODE"
+                echo "Falling back to Docker Hub tag delete API..."
+
+                FALLBACK_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                  -X DELETE \
+                  -H "Authorization: JWT $DOCKER_DELETE_TOKEN" \
+                  "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/$TAG/")
+
+                if [ "$FALLBACK_CODE" == "204" ]; then
+                  echo "Docker Hub tag deleted successfully."
+                else
+                  echo "Failed to delete $REPO:$TAG (HTTP $FALLBACK_CODE)"
+                fi
+              fi
             done
-
           done
 
           echo "Cleanup completed."
