@@ -102,7 +102,7 @@ jobs:
                 -H "Authorization: Bearer $TOKEN" \
                 -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 "${REGISTRY}/v2/${DOCKER_USER}/${REPO}/manifests/${TAG}" \
-                | awk '/Docker-Content-Digest/ {print $2}' \
+                | awk '/docker-content-digest/ {print $2}' \
                 | tr -d '\r')
 
               if [ -z "$DIGEST" ]; then
