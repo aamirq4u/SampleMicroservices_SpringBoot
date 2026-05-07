@@ -30,7 +30,11 @@ jobs:
           for REPO in $REPOS; do
             echo "=============================="
             echo "Repo: $REPO"
-
+            
+            RESPONSE=$(curl -s -H "Authorization: JWT $DOCKER_TOKEN" \
+              "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/?page_size=100")
+            echo "RESPONSE: $RESPONSE"
+          
             TAGS=$(curl -s -H "Authorization: JWT $DOCKER_TOKEN" \
               "https://hub.docker.com/v2/repositories/$DOCKER_USER/$REPO/tags/?page_size=100" \
               | jq -r '.results | sort_by(.last_updated) | reverse | .[].name')
