@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -28,10 +31,16 @@ jobs:
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest ./${{ matrix.service }}
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:${{ env.SHORT_SHA }} \
+            ./${{ matrix.service }}
 
       - name: Push Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:${{ env.SHORT_SHA }}
 
   deploy-to-render:
     needs: build
@@ -47,7 +56,7 @@ jobs:
           echo "$CONFIG_RESPONSE"
           CONFIG_DEPLOY_ID=$(echo $CONFIG_RESPONSE | jq -r '.deploy.id')
           echo "Config Deploy ID: $CONFIG_DEPLOY_ID"
-          
+
           for i in {1..30}; do
             CONFIG_STATUS=$(curl -s \
               -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
@@ -78,20 +87,20 @@ jobs:
           echo "$SERVICE_RESPONSE"
           SERVICE_DEPLOY_ID=$(echo $SERVICE_RESPONSE | jq -r '.deploy.id')
           echo "Service Deploy ID: $SERVICE_DEPLOY_ID"
-          
+
           for i in {1..30}; do
             SERVICE_STATUS=$(curl -s \
               -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
               "https://api.render.com/v1/services/${{ secrets.SERVICE_SERVICE_ID }}/deploys/${SERVICE_DEPLOY_ID}" \
               | jq -r '.status')
-          
+
             echo "[service-service] Status: $SERVICE_STATUS"
-          
+
             if [ "$SERVICE_STATUS" = "live" ]; then
               echo "Service service deployed"
               exit 0
             fi
-          
+
             if [ "$SERVICE_STATUS" = "build_failed" ] || [ "$SERVICE_STATUS" = "update_failed" ]; then
               echo "Service service failed"
               exit 1
@@ -109,20 +118,20 @@ jobs:
           echo "$DEPARTMENT_RESPONSE"
           DEPARTMENT_DEPLOY_ID=$(echo $DEPARTMENT_RESPONSE | jq -r '.deploy.id')
           echo "Department Deploy ID: $DEPARTMENT_DEPLOY_ID"
-          
+
           for i in {1..30}; do
             DEPARTMENT_STATUS=$(curl -s \
               -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
               "https://api.render.com/v1/services/${{ secrets.DEPARTMENT_SERVICE_ID }}/deploys/${DEPARTMENT_DEPLOY_ID}" \
               | jq -r '.status')
-          
+
             echo "[department-service] Status: $DEPARTMENT_STATUS"
-          
+
             if [ "$DEPARTMENT_STATUS" = "live" ]; then
               echo "Department service deployed"
               exit 0
             fi
-          
+
             if [ "$DEPARTMENT_STATUS" = "build_failed" ] || [ "$DEPARTMENT_STATUS" = "update_failed" ]; then
               echo "Department service failed"
               exit 1
@@ -135,26 +144,25 @@ jobs:
       # 4. Deploy Employee Service
       # =============================
       - name: Deploy Employee Service
-
         run: |
           EMPLOYEE_RESPONSE=$(curl -s -X POST "${{ secrets.EMPLOYEE_HOOK }}")
           echo "$EMPLOYEE_RESPONSE"
           EMPLOYEE_DEPLOY_ID=$(echo $EMPLOYEE_RESPONSE | jq -r '.deploy.id')
           echo "Employee Deploy ID: $EMPLOYEE_DEPLOY_ID"
-          
+
           for i in {1..30}; do
             EMPLOYEE_STATUS=$(curl -s \
               -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
               "https://api.render.com/v1/services/${{ secrets.EMPLOYEE_SERVICE_ID }}/deploys/${EMPLOYEE_DEPLOY_ID}" \
               | jq -r '.status')
-          
+
             echo "[employee-service] Status: $EMPLOYEE_STATUS"
-          
+
             if [ "$EMPLOYEE_STATUS" = "live" ]; then
               echo "Employee service deployed"
               exit 0
             fi
-          
+
             if [ "$EMPLOYEE_STATUS" = "build_failed" ] || [ "$EMPLOYEE_STATUS" = "update_failed" ]; then
               echo "Employee service failed"
               exit 1
@@ -163,31 +171,29 @@ jobs:
           done
           exit 1
 
-
       # =============================
       # 5. Deploy API Gateway
       # =============================
       - name: Deploy Gateway
-
         run: |
           GATEWAY_RESPONSE=$(curl -s -X POST "${{ secrets.GATEWAY_HOOK }}")
           echo "$GATEWAY_RESPONSE"
           GATEWAY_DEPLOY_ID=$(echo $GATEWAY_RESPONSE | jq -r '.deploy.id')
           echo "Gateway Deploy ID: $GATEWAY_DEPLOY_ID"
-          
+
           for i in {1..30}; do
             GATEWAY_STATUS=$(curl -s \
               -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
               "https://api.render.com/v1/services/${{ secrets.GATEWAY_SERVICE_ID }}/deploys/${GATEWAY_DEPLOY_ID}" \
               | jq -r '.status')
-          
+
             echo "[gateway-service] Status: $GATEWAY_STATUS"
-          
+
             if [ "$GATEWAY_STATUS" = "live" ]; then
               echo "Gateway service deployed"
               exit 0
             fi
-          
+
             if [ "$GATEWAY_STATUS" = "build_failed" ] || [ "$GATEWAY_STATUS" = "update_failed" ]; then
               echo "Gateway service failed"
               exit 1
@@ -196,9 +202,8 @@ jobs:
           done
           exit 1
 
-
       # =============================
-      # 7. Final validation
+      # 6. Final validation
       # =============================
       - name: Final system check
         run: |
