@@ -3,7 +3,7 @@ name: Docker Hub Cleanup (All Repos)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 12 * * *'
+    - cron: '30 22 * * *' # 4:00 AM IST, this is in UTC
 
 jobs:
   cleanup:
