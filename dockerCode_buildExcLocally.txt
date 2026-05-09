@@ -1,0 +1,87 @@
+// docker related code to buid, execute docker locally
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\service-registry\ // got project service directory
+mvn clean package -DskipTests // to create jar file for springboot application
+
+docker build -t service-registry . // to build/ generate image 
+docker build -t micro-service-registry . // to build/ generate image  (name change)
+docker build -t micro-service-registry:latest . // to build/ generate image  (with tag latest)
+docker build -t micro-service-registry:05d3910 . // to build/ generate image  (with custom tag)
+docker build -t micro-service-registry:05d3910 -t micro-service-registry:latest . // to build/ generate image  (with multiple tags)
+
+docker run -p 8080:8080 micro-service-registry // to select image and run container for that image
+docker run -e PORT=8080 -p 8080:8080 micro-service-registry // to select image and run container for that image (pass env var)
+docker run -e PORT=8080 -p 8080:8080 micro-service-registry:05d3910 // to select image and run container for that image (select image with specfic tag)
+docker run -e PORT=8080 -p 8080:8080 micro-service-registry:latest // to select image and run container for that image (select image with latest tag)
+
+docker stop containerId // to stop container
+
+
+docker network create microservices-network
+
+*****************************************************************************************************************************************************************
+using -e
+*****************************************************************************************************************************************************************
+service-registry
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\service-registry\
+mvn clean package -DskipTests
+docker build -t micro-service-registry:05d3910 -t micro-service-registry:latest .
+docker run --name service-registry --network microservices-network -e PORT=8762 -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8761:8762 micro-service-registry:05d3910
+
+config-server
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\config-server\
+mvn clean package -DskipTests
+docker build -t micro-config-server:05d3910 -t micro-config-server:latest .
+docker run --name config-server --network microservices-network --dns=8.8.8.8 --dns=1.1.1.1 -e PORT=8889 -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8888:8889 micro-config-server:05d3910
+
+department-service
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\department-service\
+mvn clean package -DskipTests
+docker build -t micro-department-service:05d3910 -t micro-department-service:latest .
+docker run --name department-service --network microservices-network -e PORT=8181 -e CONFIG_SERVER_URL=http://config-server:8889/ -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8081:8181 micro-department-service:05d3910
+
+employee-service
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\employee-service\
+mvn clean package -DskipTests
+docker build -t micro-employee-service:05d3910 -t micro-employee-service:latest .
+docker run --name employee-service --network microservices-network -e PORT=8182 -e CONFIG_SERVER_URL=http://config-server:8889/ -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8082:8182 micro-employee-service:05d3910
+
+api-gateway
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\api-gateway\
+mvn clean package -DskipTests
+docker build -t micro-api-gateway:05d3910 -t micro-api-gateway:latest .
+docker run --name api-gateway --network microservices-network -e PORT=8180 -e CONFIG_SERVER_URL=http://config-server:8889/ -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8080:8180 micro-api-gateway:05d3910
+
+
+*****************************************************************************************************************************************************************
+using --env-file
+*****************************************************************************************************************************************************************
+service-registry
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\service-registry\
+mvn clean package -DskipTests
+docker build -t micro-service-registry:05d3910 -t micro-service-registry:latest .
+docker run --name service-registry --network microservices-network --env-file docker_local.env -p 8761:8762 micro-service-registry:05d3910
+
+config-server
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\config-server\
+mvn clean package -DskipTests
+docker build -t micro-config-server:05d3910 -t micro-config-server:latest .
+docker run --name config-server --network microservices-network --dns=8.8.8.8 --dns=1.1.1.1 --env-file docker_local.env -p 8888:8889 micro-config-server:05d3910
+
+department-service
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\department-service\
+mvn clean package -DskipTests
+docker build -t micro-department-service:05d3910 -t micro-department-service:latest .
+docker run --name department-service --network microservices-network --env-file docker_local.env -p 8081:8181 micro-department-service:05d3910
+
+employee-service
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\employee-service\
+mvn clean package -DskipTests
+docker build -t micro-employee-service:05d3910 -t micro-employee-service:latest .
+docker run --name employee-service --network microservices-network --env-file docker_local.env -p 8082:8182 micro-employee-service:05d3910
+
+api-gateway
+cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\api-gateway\
+mvn clean package -DskipTests
+docker build -t micro-api-gateway:05d3910 -t micro-api-gateway:latest .
+docker run --name api-gateway --network microservices-network --env-file docker_local.env -p 8080:8180 micro-api-gateway:05d3910
+

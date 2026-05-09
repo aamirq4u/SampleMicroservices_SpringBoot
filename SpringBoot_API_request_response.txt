@@ -1,0 +1,18 @@
+**************************************************************************************************************************
+API request-response process
+chat gpt entire response
+**************************************************************************************************************************
+this is a springboot application in whioch i have servce-registry, config-server,department-service, employee-servicve and api-gateway, i am using this , 
+docker network create microservices-network
+docker run --name service-registry --network microservices-network -e PORT=8762 -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8761:8762 micro-service-registry:05d3910
+
+docker run --name config-server --network microservices-network --dns=8.8.8.8 --dns=1.1.1.1 -e PORT=8889 -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8888:8889 micro-config-server:05d3910
+
+docker run --name department-service --network microservices-network -e PORT=8181 -e CONFIG_SERVER_URL=http://config-server:8889/ -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8081:8181 micro-department-service:05d3910
+
+docker run --name employee-service --network microservices-network -e PORT=8182 -e CONFIG_SERVER_URL=http://config-server:8889/ -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8082:8182 micro-employee-service:05d3910
+
+docker run --name api-gateway --network microservices-network -e PORT=8180 -e CONFIG_SERVER_URL=http://config-server:8889/ -e EUREKA_SERVER_URL=http://service-registry:8762/eureka/ -p 8080:8180 micro-api-gateway:05d3910
+
+create a visual dioagram and explain how a request will ber initaied from browser and response returned from a service also, explain which port will be involved, how msg will travel.
+for eg. i hit http://localhost:8080/employee from broiwser, how everything will work. 
