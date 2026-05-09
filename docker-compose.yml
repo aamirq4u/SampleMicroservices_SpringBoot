@@ -1,0 +1,138 @@
+version: "3.9"
+
+services:
+
+  # -------------------------
+  # SERVICE REGISTRY (Eureka)
+  # -------------------------
+  service-registry:
+    build:
+      context: ./service-registry
+      dockerfile: ./Dockerfile
+    image: micro-service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8762"
+    env_file:
+      - ./service-registry/docker_local.env
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8762/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # -------------------------
+  # CONFIG SERVER
+  # -------------------------
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: ./Dockerfile
+    image: micro-config-server
+    container_name: config-server
+    ports:
+      - "8888:8889"
+    env_file:
+      - ./config-server/docker_local.env
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+    depends_on:
+      service-registry:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8889/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # -------------------------
+  # DEPARTMENT SERVICE
+  # -------------------------
+  department-service:
+    build:
+      context: ./department-service
+      dockerfile: ./Dockerfile
+    image: micro-department-service
+    container_name: department-service
+    ports:
+      - "8081:8181"
+    env_file:
+      - ./department-service/docker_local.env
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+
+  # -------------------------
+  # EMPLOYEE SERVICE
+  # -------------------------
+  employee-service:
+    build:
+      context: ./employee-service
+      dockerfile: ./Dockerfile
+    image: micro-employee-service
+    container_name: employee-service
+    ports:
+      - "8082:8182"
+    env_file:
+      - ./employee-service/docker_local.env
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+
+  # -------------------------
+  # API GATEWAY
+  # -------------------------
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: ./Dockerfile
+    image: micro-api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8180"
+    env_file:
+      - ./api-gateway/docker_local.env
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      department-service:
+        condition: service_started
+      employee-service:
+        condition: service_started
+
+# -------------------------
+# NETWORK
+# -------------------------
+networks:
+  microservices-network:
+    driver: bridge

@@ -18,6 +18,11 @@ docker stop containerId // to stop container
 
 docker network create microservices-network
 
+Instead of docker run, you can you,
+docker compose up
+docker compose down
+
+
 *****************************************************************************************************************************************************************
 using -e
 *****************************************************************************************************************************************************************
@@ -84,4 +89,12 @@ cd D:\MySampleSpringBootProject\SampleMicroservices_SpringBoot\api-gateway\
 mvn clean package -DskipTests
 docker build -t micro-api-gateway:05d3910 -t micro-api-gateway:latest .
 docker run --name api-gateway --network microservices-network --env-file docker_local.env -p 8080:8180 micro-api-gateway:05d3910
+
+*****************************************************************************************************************************************************************
+using docker compose
+*****************************************************************************************************************************************************************
+cd <root of repo>
+mvn clean package -DskipTests
+docker compose up --build  //creates local image and run the container
+docker compose down        // stops and delete the container
 
